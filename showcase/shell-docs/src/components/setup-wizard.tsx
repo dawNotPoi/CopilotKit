@@ -746,7 +746,10 @@ export function SetupWizard({
         />
       </div>
     );
-    footer = partnerBackend ? <WizardNav onBack={handleBack} /> : null;
+    footer =
+      partnerBackend && layout !== "rail" ? (
+        <WizardNav onBack={handleBack} />
+      ) : null;
   } else if (current === 2) {
     stepName = "Your frontend";
     stepDescription = "Choose the frontend your app uses to continue.";
@@ -764,7 +767,7 @@ export function SetupWizard({
         />
       </div>
     );
-    footer = <WizardNav onBack={handleBack} />;
+    footer = layout === "rail" ? null : <WizardNav onBack={handleBack} />;
   } else if (current === 3) {
     stepName = "Your agent backend";
     stepDescription =
@@ -781,7 +784,7 @@ export function SetupWizard({
         />
       </div>
     );
-    footer = <WizardNav onBack={handleBack} />;
+    footer = layout === "rail" ? null : <WizardNav onBack={handleBack} />;
   } else if (current === 4) {
     stepName = "What you want to build";
     stepDescription =
@@ -804,7 +807,7 @@ export function SetupWizard({
     );
     footer = (
       <WizardNav
-        onBack={handleBack}
+        onBack={layout === "rail" ? undefined : handleBack}
         onContinue={(pointerActivated) => goTo(5, "forward", pointerActivated)}
         continueLabel={featureIds.size > 0 ? "Continue" : "Skip"}
       />
@@ -845,7 +848,7 @@ export function SetupWizard({
     );
     footer = (
       <WizardNav
-        onBack={handleBack}
+        onBack={layout === "rail" ? undefined : handleBack}
         onContinue={handleCopy}
         continueLabel={COPY_LABEL[copyState]}
         continueIcon={<Copy aria-hidden="true" className="h-4 w-4" />}

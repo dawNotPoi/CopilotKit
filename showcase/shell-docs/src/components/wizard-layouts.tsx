@@ -1,4 +1,5 @@
 import React from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { StepperStep } from "./wizard-stepper-parts";
 
 export type WizardLayout = "classic" | "journey" | "rail";
@@ -177,9 +178,38 @@ export function WizardRail({
               }}
             />
           </span>
+          <div className="wizard-rail-arrows">
+            <button
+              type="button"
+              aria-label="Previous step"
+              disabled={activeIndex === 0}
+              onClick={(event) =>
+                onJump(steps[activeIndex - 1].n, event.detail > 0)
+              }
+            >
+              <ArrowLeft aria-hidden="true" size={16} />
+            </button>
+            <button
+              type="button"
+              aria-label="Next visited step"
+              disabled={
+                activeIndex === steps.length - 1 ||
+                steps[activeIndex + 1].n > furthest
+              }
+              onClick={(event) =>
+                onJump(steps[activeIndex + 1].n, event.detail > 0)
+              }
+            >
+              <ArrowRight aria-hidden="true" size={16} />
+            </button>
+          </div>
         </div>
       </nav>
-      <div className="wizard-rail-stage" data-wizard-current-step="">
+      <div
+        className="wizard-rail-stage"
+        data-wizard-current-step=""
+        data-wizard-step={current}
+      >
         {children}
       </div>
     </div>

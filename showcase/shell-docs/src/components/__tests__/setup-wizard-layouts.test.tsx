@@ -52,6 +52,18 @@ describe("setup wizard layout previews", () => {
     ).toContain("Existing project");
     expect(new URLSearchParams(location.search).get("project")).toBe("yes");
     expect(new URLSearchParams(location.search).get("wizardLayout")).toBe("b");
+    expect(screen.queryByRole("button", { name: "Back" })).toBeNull();
+    expect(
+      document
+        .querySelector(".wizard-rail-progress-footer")
+        ?.contains(screen.getByRole("button", { name: "Previous step" })),
+    ).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Previous step" }));
+    expect(
+      screen.getByRole("heading", { name: "Where are you starting?" }),
+    ).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Next visited step" }));
+    expect(screen.getByRole("heading", { name: "Your frontend" })).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "React" }));
     expect(
@@ -65,6 +77,12 @@ describe("setup wizard layout previews", () => {
     expect(screen.getAllByRole("button", { name: /Backend \d+/ })).toHaveLength(
       18,
     );
+    expect(screen.queryByRole("button", { name: "Back" })).toBeNull();
+    expect(
+      screen.getByRole<HTMLButtonElement>("button", {
+        name: "Next visited step",
+      }).disabled,
+    ).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Backend 17" }));
     fireEvent.click(screen.getByRole("button", { name: "Skip" }));
     expect(
@@ -116,6 +134,11 @@ describe("setup wizard layout previews", () => {
   it("keeps the fixed backend out of partner progress in both layouts", () => {
     window.history.replaceState({}, "", "/mastra?wizardLayout=b");
     mount("backend-0");
+    expect(
+      screen.getByRole<HTMLButtonElement>("button", {
+        name: "Previous step",
+      }).disabled,
+    ).toBe(true);
     expect(
       document.querySelector(".wizard-rail-progress")?.textContent,
     ).not.toContain("Backend");
