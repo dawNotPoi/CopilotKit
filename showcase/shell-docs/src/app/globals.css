@@ -2854,7 +2854,7 @@ samp {
 .wizard-rail-layout {
   display: grid;
   grid-template-columns: minmax(11rem, 12.5rem) minmax(0, 1fr);
-  height: clamp(31rem, 68dvh, 50rem);
+  height: clamp(29rem, 63dvh, 47rem);
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--shell-docs-radius-surface);
@@ -3031,6 +3031,9 @@ samp {
 }
 .wizard-rail-stage[data-wizard-step="3"] .wizard-preview-card {
   max-width: none;
+}
+.wizard-rail-stage[data-wizard-step="5"] [data-testid="wizard-footer"] {
+  border-top: 0;
 }
 .wizard-rail-stage .wizard-preview-heading {
   font-size: 1.5rem;
