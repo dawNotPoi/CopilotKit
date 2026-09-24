@@ -284,6 +284,7 @@ export function SetupWizard({
    *  so it lands on the right step without stealing focus or animating a
    *  transition nobody asked for. */
   const pendingTransitionRef = React.useRef<PendingTransition | null>(null);
+  const pendingLayoutSwitchRef = React.useRef(false);
   const isFirstRenderRef = React.useRef(true);
 
   /** Mirrors of `current`/`furthest`, kept in sync below on every render.
@@ -425,13 +426,41 @@ export function SetupWizard({
 
     const pending = pendingTransitionRef.current;
     pendingTransitionRef.current = null;
+    if (pendingLayoutSwitchRef.current) {
+      pendingLayoutSwitchRef.current = false;
+      if (!prefersReducedMotion()) {
+        wrapperRef.current?.animate(
+          [
+            { opacity: 0.5, transform: "translateY(6px)" },
+            { opacity: 1, transform: "translateY(0)" },
+          ],
+          { duration: 220, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+        );
+      }
+    }
     if (!pending) return;
 
     headingRef.current?.focus({ preventScroll: layout !== "classic" });
 
-    // Both previews keep their question in a fixed stage. Scrolling the docs
-    // pane to compensate for a moving row made the entire page jump.
-    if (layout !== "classic") return;
+    // Preview questions stay in a fixed stage. Animate only the incoming
+    // content, never the docs pane or the stage position.
+    if (layout !== "classic") {
+      if (!prefersReducedMotion()) {
+        const distance = pending.direction === "forward" ? 10 : -10;
+        wrapperRef.current
+          ?.querySelector<HTMLElement>(
+            "[data-wizard-current-step] .wizard-preview-card",
+          )
+          ?.animate(
+            [
+              { opacity: 0.35, transform: `translateX(${distance}px)` },
+              { opacity: 1, transform: "translateX(0)" },
+            ],
+            { duration: 220, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+          );
+      }
+      return;
+    }
 
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
@@ -517,6 +546,8 @@ export function SetupWizard({
   }
 
   function changeLayout(next: WizardLayout) {
+    if (next === layout) return;
+    pendingLayoutSwitchRef.current = true;
     setLayout(next);
     const url = new URL(window.location.href);
     url.searchParams.set("wizardPreview", "1");
@@ -893,6 +924,7 @@ export function SetupWizard({
         steps={steps}
         current={current}
         furthest={furthest}
+        summaries={summaries}
         onJump={handleJump}
       >
         {card}

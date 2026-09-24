@@ -115,34 +115,69 @@ export function WizardRail({
   steps,
   current,
   furthest,
+  summaries,
   onJump,
   children,
-}: Omit<ProgressProps, "summaries"> & {
+}: ProgressProps & {
   children: React.ReactNode;
 }): React.JSX.Element {
+  const activeIndex = Math.max(
+    0,
+    steps.findIndex((step) => step.n === current),
+  );
   return (
     <div className="wizard-rail-layout">
       <nav className="wizard-rail-progress" aria-label="Setup steps">
-        <ol>
-          {steps.map((step, index) => {
-            const reached = step.n <= furthest;
-            return (
-              <li key={step.n}>
-                <button
-                  type="button"
-                  disabled={!reached}
-                  aria-current={current === step.n ? "step" : undefined}
-                  onClick={(event) => onJump(step.n, event.detail > 0)}
-                >
-                  <span className="wizard-rail-number" aria-hidden="true">
-                    {index + 1}
-                  </span>
-                  <span>{step.label}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
+        <div className="wizard-rail-progress-heading">Your setup</div>
+        <div className="wizard-rail-list-wrap">
+          <span
+            className="wizard-rail-active-marker"
+            aria-hidden="true"
+            style={{ transform: `translateY(${activeIndex * 4}rem)` }}
+          />
+          <ol>
+            {steps.map((step, index) => {
+              const reached = step.n <= furthest;
+              const active = current === step.n;
+              return (
+                <li key={step.n}>
+                  <button
+                    type="button"
+                    disabled={!reached}
+                    aria-current={active ? "step" : undefined}
+                    onClick={(event) => onJump(step.n, event.detail > 0)}
+                  >
+                    <span className="wizard-rail-number" aria-hidden="true">
+                      {index + 1}
+                    </span>
+                    <span className="wizard-rail-step-copy">
+                      <span className="wizard-rail-step-label">
+                        {step.label}
+                      </span>
+                      {reached && !active && summaries[step.n] ? (
+                        <span className="wizard-rail-step-summary">
+                          {summaries[step.n]}
+                        </span>
+                      ) : null}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+        <div className="wizard-rail-progress-footer">
+          <span>
+            Step {activeIndex + 1} of {steps.length}
+          </span>
+          <span className="wizard-rail-progress-track" aria-hidden="true">
+            <span
+              style={{
+                transform: `scaleX(${(activeIndex + 1) / steps.length})`,
+              }}
+            />
+          </span>
+        </div>
       </nav>
       <div className="wizard-rail-stage" data-wizard-current-step="">
         {children}

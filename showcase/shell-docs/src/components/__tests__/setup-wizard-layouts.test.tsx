@@ -44,6 +44,12 @@ describe("setup wizard layout previews", () => {
     fireEvent.click(screen.getByRole("button", { name: "B · Focused step" }));
     expect(document.querySelector(".wizard-rail-layout")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Your frontend" })).toBeTruthy();
+    expect(
+      document.querySelector(".wizard-rail-progress-footer")?.textContent,
+    ).toContain("Step 2 of 5");
+    expect(
+      document.querySelector(".wizard-rail-progress")?.textContent,
+    ).toContain("Existing project");
     expect(new URLSearchParams(location.search).get("project")).toBe("yes");
     expect(new URLSearchParams(location.search).get("wizardLayout")).toBe("b");
 
@@ -51,6 +57,11 @@ describe("setup wizard layout previews", () => {
     expect(
       screen.getByRole("heading", { name: "Your agent backend" }),
     ).toBeTruthy();
+    expect(
+      document
+        .querySelector(".wizard-rail-active-marker")
+        ?.getAttribute("style"),
+    ).toContain("8rem");
     expect(screen.getAllByRole("button", { name: /Backend \d+/ })).toHaveLength(
       18,
     );
@@ -81,6 +92,25 @@ describe("setup wizard layout previews", () => {
     ).toBe(true);
     expect(document.querySelectorAll(".wizard-journey-step")).toHaveLength(5);
     expect(window.scrollBy).not.toHaveBeenCalled();
+  });
+
+  it("animates the layout switch and incoming B question when motion is allowed", () => {
+    window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+    const animate = vi.fn().mockReturnValue({ cancel: vi.fn() });
+    const originalAnimate = Element.prototype.animate;
+    Element.prototype.animate = animate;
+    try {
+      mount();
+      fireEvent.click(screen.getByRole("button", { name: "B · Focused step" }));
+      expect(animate).toHaveBeenCalledTimes(1);
+      fireEvent.click(screen.getByRole("button", { name: /Existing project/ }));
+      expect(animate).toHaveBeenCalledTimes(2);
+      expect(
+        screen.getByRole("heading", { name: "Your frontend" }),
+      ).toBeTruthy();
+    } finally {
+      Element.prototype.animate = originalAnimate;
+    }
   });
 
   it("keeps the fixed backend out of partner progress in both layouts", () => {

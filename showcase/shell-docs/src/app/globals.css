@@ -2853,18 +2853,43 @@ samp {
 
 .wizard-rail-layout {
   display: grid;
-  grid-template-columns: minmax(9.5rem, 11.5rem) minmax(0, 1fr);
-  gap: 1.5rem;
-  align-items: start;
+  grid-template-columns: minmax(11rem, 12.5rem) minmax(0, 1fr);
+  min-height: 25rem;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--shell-docs-radius-surface);
+  background: var(--bg-surface);
 }
 .wizard-rail-progress {
-  position: sticky;
-  top: 6rem;
+  display: flex;
   min-width: 0;
-  max-height: calc(100vh - 7rem);
+  flex-direction: column;
   overflow-y: auto;
   border-right: 1px solid var(--border);
-  padding-right: 0.75rem;
+  background: var(--bg-elevated);
+  padding: 1.1rem 0.7rem;
+}
+.wizard-rail-progress-heading {
+  margin: 0.15rem 0.65rem 1rem;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+.wizard-rail-list-wrap {
+  position: relative;
+}
+.wizard-rail-active-marker {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3.75rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+  border-radius: var(--shell-docs-radius-control);
+  background: var(--accent-dim);
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
 }
 .wizard-rail-progress ol {
   display: grid;
@@ -2874,22 +2899,23 @@ samp {
   list-style: none;
 }
 .wizard-rail-progress button {
+  position: relative;
   display: flex;
   width: 100%;
-  min-height: 2.75rem;
+  height: 3.75rem;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.4rem 0.5rem;
+  gap: 0.7rem;
+  padding: 0.5rem 0.65rem;
   border: 0;
   border-radius: var(--shell-docs-radius-control);
   color: var(--text-secondary);
-  font-size: 0.8rem;
-  font-weight: 600;
   text-align: left;
   cursor: pointer;
 }
+.wizard-rail-progress button:hover:not(:disabled):not([aria-current="step"]) {
+  background: var(--bg-surface);
+}
 .wizard-rail-progress button[aria-current="step"] {
-  background: var(--accent-dim);
   color: var(--accent);
 }
 .wizard-rail-progress button:disabled {
@@ -2898,33 +2924,78 @@ samp {
 }
 .wizard-rail-number {
   display: grid;
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.6rem;
+  height: 1.6rem;
   flex: none;
   place-items: center;
-  border-radius: var(--shell-docs-radius-icon);
-  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-surface);
   font-size: 0.7rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .wizard-rail-progress [aria-current="step"] .wizard-rail-number {
+  border-color: var(--accent-fill);
   background: var(--accent-fill);
   color: var(--primary-foreground);
+}
+.wizard-rail-step-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.12rem;
+}
+.wizard-rail-step-label {
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+.wizard-rail-step-summary {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wizard-rail-progress-footer {
+  display: grid;
+  gap: 0.55rem;
+  margin: auto 0.65rem 0;
+  padding-top: 1rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.wizard-rail-progress-track {
+  height: 0.2rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border);
+}
+.wizard-rail-progress-track span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transform-origin: left;
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .wizard-rail-stage {
   min-width: 0;
   overflow-anchor: none;
+  padding: 1.5rem;
 }
 .wizard-rail-stage .wizard-preview-card {
+  min-height: 0;
   border: 0;
+  background: transparent;
   padding: 0;
 }
 .wizard-rail-stage .wizard-preview-heading {
   font-size: 1.5rem;
 }
 .wizard-rail-stage .wizard-preview-choice-grid {
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
 }
 .wizard-rail-stage .wizard-preview-choice-icon {
   display: none;
@@ -2949,19 +3020,32 @@ samp {
 .wizard-journey .wizard-pick-grid {
   grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
 }
+@media (prefers-reduced-motion: reduce) {
+  .wizard-rail-active-marker,
+  .wizard-rail-progress-track span {
+    transition-duration: 0ms;
+  }
+}
 @container (max-width: 43rem) {
   .wizard-rail-layout {
     grid-template-columns: minmax(0, 1fr);
-    gap: 1.25rem;
+    min-height: 0;
   }
   .wizard-rail-progress {
-    position: static;
-    max-height: none;
     overflow-x: auto;
     overflow-y: hidden;
     border-right: 0;
     border-bottom: 1px solid var(--border);
-    padding: 0 0 0.5rem;
+    padding: 0.7rem;
+  }
+  .wizard-rail-progress-heading,
+  .wizard-rail-progress-footer,
+  .wizard-rail-active-marker,
+  .wizard-rail-step-summary {
+    display: none;
+  }
+  .wizard-rail-list-wrap {
+    overflow-x: auto;
   }
   .wizard-rail-progress ol {
     display: flex;
@@ -2969,7 +3053,15 @@ samp {
   }
   .wizard-rail-progress button {
     width: auto;
+    height: 2.75rem;
     white-space: nowrap;
+  }
+  .wizard-rail-progress button[aria-current="step"] {
+    background: var(--accent-dim);
+  }
+  .wizard-rail-stage {
+    min-height: 20rem;
+    padding: 1.25rem;
   }
 }
 @container (max-width: 33rem) {
