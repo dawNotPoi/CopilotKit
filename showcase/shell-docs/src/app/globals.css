@@ -2888,11 +2888,18 @@ samp {
   right: 0;
   left: 0;
   height: 3.75rem;
-  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+  border: 1px solid var(--border);
   border-radius: var(--shell-docs-radius-control);
-  background: var(--accent-dim);
-  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--bg-surface);
+  transition:
+    transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 180ms,
+    background-color 180ms;
   pointer-events: none;
+}
+.wizard-rail-active-marker.is-selected {
+  border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
+  background: var(--accent-dim);
 }
 .wizard-rail-progress ol {
   display: grid;
@@ -2911,14 +2918,17 @@ samp {
   padding: 0.5rem 0.65rem;
   border: 0;
   border-radius: var(--shell-docs-radius-control);
-  color: var(--text-secondary);
+  color: var(--text-muted);
   text-align: left;
   cursor: pointer;
 }
 .wizard-rail-progress button:hover:not(:disabled):not([aria-current="step"]) {
   background: var(--bg-surface);
 }
-.wizard-rail-progress button[aria-current="step"] {
+.wizard-rail-progress button[data-selected="true"] {
+  color: var(--text-secondary);
+}
+.wizard-rail-progress button[aria-current="step"][data-selected="true"] {
   color: var(--accent);
 }
 .wizard-rail-progress button:disabled {
@@ -2938,7 +2948,7 @@ samp {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.wizard-rail-progress [aria-current="step"] .wizard-rail-number {
+.wizard-rail-progress [data-selected="true"] .wizard-rail-number {
   border-color: var(--accent-fill);
   background: var(--accent-fill);
   color: var(--primary-foreground);
@@ -3077,6 +3087,13 @@ samp {
   }
 }
 @container (max-width: 55rem) {
+  .wizard-rail-stage .wizard-review-feature-summary {
+    flex-wrap: wrap;
+    gap: 0.125rem;
+  }
+  .wizard-rail-stage .wizard-review-feature-preview {
+    width: 100%;
+  }
   .wizard-rail-layout .wizard-backend-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3114,7 +3131,12 @@ samp {
     white-space: nowrap;
   }
   .wizard-rail-progress button[aria-current="step"] {
+    background: var(--bg-surface);
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+  .wizard-rail-progress button[aria-current="step"][data-selected="true"] {
     background: var(--accent-dim);
+    box-shadow: none;
   }
   .wizard-rail-stage {
     padding: 1.25rem;

@@ -18,10 +18,8 @@
 // was chosen — every tile held one short value in a lot of air. A single
 // row per answer, led by the same numbered circle the reader already knows
 // from the progress rail above the card, reads instead as "here is your
-// answer to each step". A full-width row also means the feature list — up
-// to six selected values — fits on one line rather than forcing the tile
-// that held it to grow taller than the others or wrap its values into a
-// stretched box.
+// answer to each step". The feature row summarizes its count and previews
+// the names so the panel stays compact as selections grow.
 //
 // These rows are never `PickGrid` itself, despite reusing its hover
 // treatment: they are never selected and never carry `aria-pressed`, since
@@ -41,20 +39,14 @@
 // ring; without it every row click reported as a keyboard activation
 // regardless of how the reader actually triggered it.
 //
-// The frontend and agent-backend marks come from `PickLogoMark`, each
-// feature's own icon from `CapabilityIconMark` — both imported from
-// `./docs-map-parts` — and the project row's checkmark/plus from
-// `PROJECT_ANSWER_ICONS` in `./wizard-stepper-parts`, none of them
-// reimplemented here. `CapabilityIconMark` wraps a deliberate named-import
-// icon record rather than a namespace import (605 KB minified against 6 KB
-// for named imports — see that file's header comment on `CAPABILITY_ICONS`);
-// a second copy of any of these records here would invite the same
-// bundle-size regression straight back.
+// The frontend and agent-backend marks come from `PickLogoMark` in
+// `./docs-map-parts`; the project row's checkmark/plus comes from
+// `PROJECT_ANSWER_ICONS` in `./wizard-stepper-parts`.
 
 import React from "react";
 import { Check } from "lucide-react";
 
-import { CapabilityIconMark, PickLogoMark } from "@/components/docs-map-parts";
+import { PickLogoMark } from "@/components/docs-map-parts";
 import { PROJECT_ANSWER_ICONS } from "@/components/wizard-stepper-parts";
 import type { MapCapability, MapPick } from "@/lib/homepage-map";
 
@@ -99,12 +91,14 @@ function ReviewRow({
   step,
   kicker,
   changeLabel,
+  description,
   onChange,
   children,
 }: {
   step: number;
   kicker: string;
   changeLabel: string;
+  description?: string;
   /** `pointerActivated` is `event.detail > 0` on this row's own click — see
    *  the header comment above. */
   onChange: (pointerActivated: boolean) => void;
@@ -115,6 +109,7 @@ function ReviewRow({
       type="button"
       onClick={(event) => onChange(event.detail > 0)}
       aria-label={changeLabel}
+      aria-description={description}
       className={ROW_CLASS}
     >
       <span className={STEP_NUMBER_CLASS}>{step}</span>
@@ -210,6 +205,15 @@ export function WizardReview({
   features,
   onNavigate,
 }: WizardReviewProps): React.JSX.Element {
+  const featureNames = features.map((feature) => feature.title).join(" · ");
+  const previewNames = features
+    .slice(0, 2)
+    .map((feature) => feature.title)
+    .join(" · ");
+  const featurePreview =
+    features.length > 2
+      ? `${previewNames} · +${features.length - 2} more`
+      : previewNames;
   return (
     <div className={PANEL_CLASS}>
       {backendFixed && (
@@ -265,21 +269,28 @@ export function WizardReview({
         step={backendFixed ? 3 : 4}
         kicker="Features"
         changeLabel="Change features"
+        description={
+          features.length
+            ? `${features.length} selected: ${featureNames}`
+            : "None selected"
+        }
         onChange={(pointerActivated) => onNavigate(4, pointerActivated)}
       >
-        {features.length > 0
-          ? features.map((feature) => (
-              <span key={feature.id} className="flex items-center gap-1.5">
-                <CapabilityIconMark
-                  icon={feature.icon}
-                  className="h-3.5 w-3.5 shrink-0 text-[var(--accent)]"
-                />
-                <span className="text-sm font-medium text-[var(--text)]">
-                  {feature.title}
-                </span>
-              </span>
-            ))
-          : NONE_VALUE}
+        {features.length > 0 ? (
+          <span className="wizard-review-feature-summary flex w-full min-w-0 items-baseline gap-2">
+            <span className="shrink-0 text-sm font-semibold text-[var(--text)]">
+              {features.length} selected
+            </span>
+            <span
+              className="wizard-review-feature-preview min-w-0 truncate text-xs text-[var(--text-muted)]"
+              title={featureNames}
+            >
+              {featurePreview}
+            </span>
+          </span>
+        ) : (
+          NONE_VALUE
+        )}
       </ReviewRow>
       {backendFixed && (
         <div className="grid grid-cols-[1.5rem_1fr_auto] sm:flex items-center gap-3 px-4 py-3.5">

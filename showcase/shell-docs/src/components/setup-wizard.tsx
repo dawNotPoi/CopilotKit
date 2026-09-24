@@ -911,6 +911,13 @@ export function SetupWizard({
     4: featureIds.size ? `${featureIds.size} selected` : "Skipped",
   };
 
+  const selectedSteps = new Set<number>();
+  if (projectAnswer && agentAnswer) selectedSteps.add(0);
+  if (projectAnswer) selectedSteps.add(1);
+  if (frontendId) selectedSteps.add(2);
+  if (backendId) selectedSteps.add(3);
+  if (featureIds.size) selectedSteps.add(4);
+
   const displayedWizard =
     layout === "journey" ? (
       <WizardJourney
@@ -928,6 +935,7 @@ export function SetupWizard({
         current={current}
         furthest={furthest}
         summaries={summaries}
+        selectedSteps={selectedSteps}
         onJump={handleJump}
       >
         {card}

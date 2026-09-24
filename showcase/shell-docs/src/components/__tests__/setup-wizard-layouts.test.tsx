@@ -52,6 +52,11 @@ describe("setup wizard layout previews", () => {
     ).toContain("Existing project");
     expect(new URLSearchParams(location.search).get("project")).toBe("yes");
     expect(new URLSearchParams(location.search).get("wizardLayout")).toBe("b");
+    expect(
+      Array.from(
+        document.querySelectorAll(".wizard-rail-progress ol button"),
+      ).map((button) => button.getAttribute("data-selected")),
+    ).toEqual(["true", null, null, null, null]);
     expect(screen.queryByRole("button", { name: "Back" })).toBeNull();
     expect(
       document
@@ -83,11 +88,21 @@ describe("setup wizard layout previews", () => {
         name: "Next visited step",
       }).disabled,
     ).toBe(true);
+    expect(
+      Array.from(
+        document.querySelectorAll(".wizard-rail-progress ol button"),
+      ).map((button) => button.getAttribute("data-selected")),
+    ).toEqual(["true", "true", null, null, null]);
     fireEvent.click(screen.getByRole("button", { name: "Backend 17" }));
     fireEvent.click(screen.getByRole("button", { name: "Skip" }));
     expect(
       screen.getByRole("heading", { name: "Ready to set up" }),
     ).toBeTruthy();
+    expect(
+      Array.from(
+        document.querySelectorAll(".wizard-rail-progress ol button"),
+      ).map((button) => button.getAttribute("data-selected")),
+    ).toEqual(["true", "true", "true", null, null]);
 
     fireEvent.click(screen.getByRole("button", { name: "A · Open journey" }));
     expect(document.querySelector(".wizard-journey")).toBeTruthy();
@@ -134,6 +149,11 @@ describe("setup wizard layout previews", () => {
   it("keeps the fixed backend out of partner progress in both layouts", () => {
     window.history.replaceState({}, "", "/mastra?wizardLayout=b");
     mount("backend-0");
+    expect(
+      document
+        .querySelector(".wizard-rail-progress ol button")
+        ?.getAttribute("data-selected"),
+    ).toBeNull();
     expect(
       screen.getByRole<HTMLButtonElement>("button", {
         name: "Previous step",

@@ -117,9 +117,11 @@ export function WizardRail({
   current,
   furthest,
   summaries,
+  selectedSteps,
   onJump,
   children,
 }: ProgressProps & {
+  selectedSteps: ReadonlySet<number>;
   children: React.ReactNode;
 }): React.JSX.Element {
   const activeIndex = Math.max(
@@ -132,7 +134,7 @@ export function WizardRail({
         <div className="wizard-rail-progress-heading">Your setup</div>
         <div className="wizard-rail-list-wrap">
           <span
-            className="wizard-rail-active-marker"
+            className={`wizard-rail-active-marker${selectedSteps.has(current) ? " is-selected" : ""}`}
             aria-hidden="true"
             style={{ transform: `translateY(${activeIndex * 4}rem)` }}
           />
@@ -140,12 +142,14 @@ export function WizardRail({
             {steps.map((step, index) => {
               const reached = step.n <= furthest;
               const active = current === step.n;
+              const selected = selectedSteps.has(step.n);
               return (
                 <li key={step.n}>
                   <button
                     type="button"
                     disabled={!reached}
                     aria-current={active ? "step" : undefined}
+                    data-selected={selected || undefined}
                     onClick={(event) => onJump(step.n, event.detail > 0)}
                   >
                     <span className="wizard-rail-number" aria-hidden="true">
