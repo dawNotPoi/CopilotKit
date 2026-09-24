@@ -152,6 +152,7 @@ export function WizardCard({
   headingRef,
   children,
   footer,
+  preview = false,
   showFocusRing = true,
 }: {
   progress?: React.ReactNode;
@@ -161,6 +162,7 @@ export function WizardCard({
   headingRef?: React.Ref<HTMLHeadingElement>;
   children: React.ReactNode;
   footer: React.ReactNode;
+  preview?: boolean;
   /** Whether the heading should render its focus ring the next time it
    *  receives focus. `true` (the default) for a keyboard-driven step change
    *  and for the initial, never-focused render; `false` for a
@@ -172,23 +174,35 @@ export function WizardCard({
 }): React.JSX.Element {
   return (
     <section
-      className={`shell-docs-radius-surface not-prose flex min-h-[30rem] flex-col p-5 sm:min-h-[36rem] sm:p-7 border border-[color-mix(in_srgb,var(--text)_18%,var(--bg-surface))] bg-[color-mix(in_srgb,var(--text)_6%,var(--bg-surface))]`}
+      className={
+        preview
+          ? "wizard-preview-card shell-docs-radius-surface not-prose"
+          : "shell-docs-radius-surface not-prose flex min-h-[30rem] flex-col border border-[color-mix(in_srgb,var(--text)_18%,var(--bg-surface))] bg-[color-mix(in_srgb,var(--text)_6%,var(--bg-surface))] p-5 sm:min-h-[36rem] sm:p-7"
+      }
     >
       {progress && <div className="mb-6 shrink-0">{progress}</div>}
-      <div className="flex min-h-0 flex-1 flex-col justify-center">
+      <div
+        className={preview ? "" : "flex min-h-0 flex-1 flex-col justify-center"}
+      >
         <h3
           ref={headingRef}
           tabIndex={-1}
-          className={`mt-1 text-center text-xl font-semibold tracking-[-0.02em] text-[var(--text)] outline-none sm:text-[1.375rem] ${
+          className={`${preview ? "wizard-preview-heading" : "mt-1 text-center text-xl sm:text-[1.375rem]"} font-semibold tracking-[-0.02em] text-[var(--text)] outline-none ${
             showFocusRing ? HEADING_FOCUS_RING_CLASS : ""
           }`}
         >
           {name}
         </h3>
-        <p className="mt-1.5 text-center text-sm leading-relaxed text-[var(--text-secondary)]">
+        <p
+          className={`${preview ? "wizard-preview-description" : "mt-1.5 text-center"} text-sm leading-relaxed text-[var(--text-secondary)]`}
+        >
           {description}
         </p>
-        <div className="mt-6 flex flex-col">{children}</div>
+        <div
+          className={preview ? "wizard-preview-choices" : "mt-6 flex flex-col"}
+        >
+          {children}
+        </div>
       </div>
       {footer && (
         <div data-testid="wizard-footer" className="shrink-0 pt-5">
@@ -221,15 +235,21 @@ export function ChoiceGrid({
   selectedId,
   disabled,
   onSelect,
+  preview = false,
 }: {
   options: readonly ChoiceOption[];
   selectedId?: string;
   disabled: boolean;
   onSelect: (id: string, pointerActivated: boolean) => void;
+  preview?: boolean;
 }): React.JSX.Element {
   return (
     <div
-      className={`grid gap-3 ${options.length === 3 ? "wizard-three-choices grid-cols-1" : "grid-cols-2"}`}
+      className={
+        preview
+          ? "wizard-preview-choice-grid"
+          : `grid gap-3 ${options.length === 3 ? "wizard-three-choices grid-cols-1" : "grid-cols-2"}`
+      }
     >
       {options.map((option) => {
         const selected = option.id === selectedId;
@@ -241,17 +261,29 @@ export function ChoiceGrid({
             disabled={disabled}
             aria-pressed={selected}
             onClick={(event) => onSelect(option.id, event.detail > 0)}
-            className={`shell-docs-radius-control block w-full cursor-pointer border px-3 py-7 text-center transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+            className={`${preview ? "wizard-preview-choice" : "shell-docs-radius-control block w-full cursor-pointer border px-3 py-7 text-center transition-colors"} disabled:cursor-not-allowed disabled:opacity-40 ${
               selected
                 ? "border-[var(--accent)] bg-[var(--accent-dim)]"
                 : "border-[color-mix(in_srgb,var(--text)_18%,var(--bg-surface))] bg-[var(--bg-surface)] shadow-sm hover:border-[var(--accent)]"
             }`}
           >
-            <span className="flex flex-col items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center text-[var(--text-secondary)]">
+            <span
+              className={
+                preview
+                  ? "wizard-preview-choice-main"
+                  : "flex flex-col items-center gap-3"
+              }
+            >
+              <span
+                className={
+                  preview
+                    ? "wizard-preview-choice-icon"
+                    : "flex h-9 w-9 shrink-0 items-center justify-center text-[var(--text-secondary)]"
+                }
+              >
                 <Icon
                   aria-hidden="true"
-                  className="h-9 w-9"
+                  className={preview ? "h-5 w-5" : "h-9 w-9"}
                   strokeWidth={1.5}
                 />
               </span>

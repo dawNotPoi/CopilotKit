@@ -2650,3 +2650,343 @@ samp {
   color: #fff;
   box-shadow: none;
 }
+
+/* Opt-in setup wizard layout previews. The default stepper keeps its original
+ * treatment until one of the shareable wizardLayout query values is used. */
+.wizard-layout-root {
+  container-type: inline-size;
+}
+.wizard-layout-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+}
+.wizard-layout-picker-label {
+  color: var(--text-muted);
+  font-weight: 650;
+}
+.wizard-layout-picker-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--shell-docs-radius-surface);
+  background: var(--bg-elevated);
+}
+.wizard-layout-picker-options button {
+  min-height: 2.25rem;
+  padding: 0.35rem 0.7rem;
+  border: 0;
+  border-radius: var(--shell-docs-radius-control);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+.wizard-layout-picker-options button[aria-pressed="true"] {
+  background: var(--bg-surface);
+  color: var(--accent);
+  box-shadow: var(--shadow-control);
+}
+.wizard-layout-picker-options button:focus-visible,
+.wizard-journey-row:focus-visible,
+.wizard-rail-progress button:focus-visible,
+.wizard-preview-choice:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.wizard-preview-card {
+  display: flex;
+  min-height: 30rem;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  padding: 1.25rem;
+}
+.wizard-preview-heading {
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+.wizard-preview-description {
+  margin-top: 0.4rem;
+  max-width: 65ch;
+}
+.wizard-preview-choices {
+  margin-top: 1.25rem;
+}
+.wizard-preview-card [data-testid="wizard-footer"] {
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+.wizard-preview-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.wizard-preview-choice {
+  display: block;
+  width: 100%;
+  min-height: 5.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--shell-docs-radius-control);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 150ms,
+    background-color 150ms;
+}
+.wizard-preview-choice-main {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.wizard-preview-choice-icon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  place-items: center;
+  border-radius: var(--shell-docs-radius-icon);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+.wizard-preview-choice > span:last-child {
+  margin: 0.3rem 0 0 2.7rem;
+  text-align: left;
+}
+
+.wizard-journey {
+  max-width: 52rem;
+  overflow-anchor: none;
+}
+.wizard-journey-stage {
+  min-width: 0;
+}
+.wizard-journey-stage .wizard-preview-card {
+  min-height: 0;
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+.wizard-journey-list {
+  position: relative;
+  display: grid;
+  gap: 0.65rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.wizard-journey-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.75rem;
+}
+.wizard-journey-step:not(:last-child)::before {
+  position: absolute;
+  top: 2.25rem;
+  bottom: -1.15rem;
+  left: 1.25rem;
+  width: 1px;
+  background: var(--border);
+  content: "";
+}
+.wizard-journey-number {
+  z-index: 1;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  margin: 0.75rem 0 0 0.25rem;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.wizard-journey-step.is-current .wizard-journey-number {
+  border-color: var(--accent-fill);
+  background: var(--accent-fill);
+  color: var(--primary-foreground);
+}
+.wizard-journey-row {
+  display: flex;
+  width: 100%;
+  min-height: 3.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--shell-docs-radius-surface);
+  background: var(--bg-surface);
+  text-align: left;
+  cursor: pointer;
+}
+.wizard-journey-row:hover:not(.is-upcoming) {
+  border-color: var(--accent);
+}
+.wizard-journey-row.is-current {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: var(--accent-dim);
+  cursor: default;
+}
+.wizard-journey-row.is-upcoming {
+  color: var(--text-muted);
+  cursor: default;
+}
+.wizard-journey-row-label {
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+.wizard-journey-row-note {
+  flex: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.wizard-rail-layout {
+  display: grid;
+  grid-template-columns: minmax(9.5rem, 11.5rem) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.wizard-rail-progress {
+  position: sticky;
+  top: 6rem;
+  min-width: 0;
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  padding-right: 0.75rem;
+}
+.wizard-rail-progress ol {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.wizard-rail-progress button {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.4rem 0.5rem;
+  border: 0;
+  border-radius: var(--shell-docs-radius-control);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.wizard-rail-progress button[aria-current="step"] {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+.wizard-rail-progress button:disabled {
+  color: var(--text-muted);
+  cursor: default;
+}
+.wizard-rail-number {
+  display: grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: none;
+  place-items: center;
+  border-radius: var(--shell-docs-radius-icon);
+  background: var(--bg-elevated);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.wizard-rail-progress [aria-current="step"] .wizard-rail-number {
+  background: var(--accent-fill);
+  color: var(--primary-foreground);
+}
+.wizard-rail-stage {
+  min-width: 0;
+  overflow-anchor: none;
+}
+.wizard-rail-stage .wizard-preview-card {
+  border: 0;
+  padding: 0;
+}
+.wizard-rail-stage .wizard-preview-heading {
+  font-size: 1.5rem;
+}
+.wizard-rail-stage .wizard-preview-choice-grid {
+  grid-template-columns: 1fr;
+}
+.wizard-rail-stage .wizard-preview-choice-icon {
+  display: none;
+}
+.wizard-rail-stage .wizard-preview-choice > span:last-child {
+  margin-left: 0;
+}
+.wizard-rail-layout .wizard-backend-grid,
+.wizard-journey .wizard-backend-grid {
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  align-content: start;
+  max-height: 17rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0.25rem;
+}
+.wizard-rail-layout .wizard-capability-grid,
+.wizard-journey .wizard-capability-grid {
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+.wizard-rail-layout .wizard-pick-grid,
+.wizard-journey .wizard-pick-grid {
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+@container (max-width: 43rem) {
+  .wizard-rail-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+  .wizard-rail-progress {
+    position: static;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 0 0.5rem;
+  }
+  .wizard-rail-progress ol {
+    display: flex;
+    width: max-content;
+  }
+  .wizard-rail-progress button {
+    width: auto;
+    white-space: nowrap;
+  }
+}
+@container (max-width: 33rem) {
+  .wizard-preview-choice-grid {
+    grid-template-columns: 1fr;
+  }
+  .wizard-journey-step {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+  .wizard-journey-number {
+    margin-left: 0;
+  }
+  .wizard-journey-step:not(:last-child)::before {
+    left: 1rem;
+  }
+  .wizard-journey-row {
+    gap: 0.5rem;
+  }
+}

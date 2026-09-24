@@ -10,8 +10,8 @@ import { useHomepageTelemetry } from "@/lib/use-homepage-telemetry";
 // state and drives the presentational parts in `./docs-map-parts`,
 // `./wizard-stepper-parts` and `./wizard-review`.
 //
-// Classic one-card-at-a-time stepper: whether the reader already has a
-// project, frontend, agent backend, features, copy prompt. This component
+// One-card-at-a-time setup flow with two opt-in layout previews: whether the
+// reader already has a project, frontend, agent backend, features, copy prompt. This component
 // owns exactly three pieces of bookkeeping: the four selections, the
 // currently displayed step (`current`), and the furthest step the reader
 // has reached (`furthest`, 1-based, never decreases). The progress rail's
@@ -51,6 +51,12 @@ import { usePostHog } from "posthog-js/react";
 import { CapabilityGrid, PickGrid } from "@/components/docs-map-parts";
 import { frontendPathForBackend, isFrontendId } from "@/lib/frontend-options";
 import { WizardReview } from "@/components/wizard-review";
+import {
+  WizardJourney,
+  WizardLayoutPicker,
+  WizardRail,
+} from "@/components/wizard-layouts";
+import type { WizardLayout } from "@/components/wizard-layouts";
 import type { MapCapability, MapPick } from "@/lib/homepage-map";
 import {
   parseWizardUrlState,
@@ -244,6 +250,8 @@ export function SetupWizard({
   /** Gates the URL-sync effect below so it cannot race the restore effect's
    *  own read-then-write with a premature empty write. */
   const [hydrated, setHydrated] = React.useState(false);
+  const [layout, setLayout] = React.useState<WizardLayout>("classic");
+  const [previewMode, setPreviewMode] = React.useState(false);
   /** Whether the card's heading should render its focus ring the next time
    *  it receives focus. Set by `goTo` from the activating click's
    *  `event.detail` (0 means the keyboard triggered it) — see that
@@ -330,6 +338,14 @@ export function SetupWizard({
   // (see that module) falls back to a passive effect during server
   // rendering, where `useLayoutEffect` would otherwise warn.
   useIsomorphicLayoutEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const previewLayout = params.get("wizardLayout");
+    if (previewLayout === "a" || previewLayout === "b") {
+      setLayout(previewLayout === "a" ? "journey" : "rail");
+      setPreviewMode(true);
+    } else if (params.get("wizardPreview") === "1") {
+      setPreviewMode(true);
+    }
     const restored = {
       ...parseWizardUrlState(window.location.search, allowlists),
     };
@@ -411,7 +427,11 @@ export function SetupWizard({
     pendingTransitionRef.current = null;
     if (!pending) return;
 
-    headingRef.current?.focus();
+    headingRef.current?.focus({ preventScroll: layout !== "classic" });
+
+    // Both previews keep their question in a fixed stage. Scrolling the docs
+    // pane to compensate for a moving row made the entire page jump.
+    if (layout !== "classic") return;
 
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
@@ -425,7 +445,7 @@ export function SetupWizard({
     });
 
     runStepSwapAnimation(wrapper, plan);
-  }, [current]);
+  }, [current, layout]);
 
   /** The only place `current`/`furthest` ever change once mounted. Always
    *  records a pending transition first — measuring the wrapper's height
@@ -494,6 +514,19 @@ export function SetupWizard({
    *  that ref above for why. */
   function handleBack(pointerActivated: boolean) {
     goTo(currentRef.current - 1, "back", pointerActivated);
+  }
+
+  function changeLayout(next: WizardLayout) {
+    setLayout(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set("wizardPreview", "1");
+    if (next === "classic") url.searchParams.delete("wizardLayout");
+    else url.searchParams.set("wizardLayout", next === "journey" ? "a" : "b");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
   }
 
   function capture(event: string, properties: Record<string, unknown>) {
@@ -624,6 +657,7 @@ export function SetupWizard({
     stepDescription = "Tell us what you already have. We’ll tailor your setup.";
     body = (
       <ChoiceGrid
+        preview={layout !== "classic"}
         options={[
           {
             ...PROJECT_OPTIONS[0],
@@ -670,6 +704,7 @@ export function SetupWizard({
     body = (
       <div>
         <ChoiceGrid
+          preview={layout !== "classic"}
           options={PROJECT_OPTIONS}
           selectedId={projectAnswer ?? undefined}
           disabled={false}
@@ -806,26 +841,73 @@ export function SetupWizard({
     );
   }
 
+  const card = (
+    <WizardCard
+      progress={
+        layout === "classic" ? (
+          <WizardProgress
+            steps={steps}
+            current={current}
+            furthest={furthest}
+            onJump={handleJump}
+          />
+        ) : undefined
+      }
+      name={stepName}
+      description={stepDescription}
+      headingRef={headingRef}
+      footer={footer}
+      preview={layout !== "classic"}
+      showFocusRing={showHeadingFocusRing}
+    >
+      {body}
+    </WizardCard>
+  );
+
+  const summaries: Readonly<Record<number, string>> = {
+    0:
+      projectAnswer === "no"
+        ? "New project"
+        : agentAnswer === "yes"
+          ? "Existing agent"
+          : "Existing project",
+    1: projectAnswer === "yes" ? "Existing project" : "New project",
+    2: frontends.find((pick) => pick.id === frontendId)?.name ?? "",
+    3: backends.find((pick) => pick.id === backendId)?.name ?? "",
+    4: featureIds.size ? `${featureIds.size} selected` : "Skipped",
+  };
+
+  const displayedWizard =
+    layout === "journey" ? (
+      <WizardJourney
+        steps={steps}
+        current={current}
+        furthest={furthest}
+        summaries={summaries}
+        onJump={handleJump}
+      >
+        {card}
+      </WizardJourney>
+    ) : layout === "rail" ? (
+      <WizardRail
+        steps={steps}
+        current={current}
+        furthest={furthest}
+        onJump={handleJump}
+      >
+        {card}
+      </WizardRail>
+    ) : (
+      card
+    );
+
   return (
     <div className="not-prose flex flex-col gap-5">
-      <div ref={wrapperRef} className="relative">
-        <WizardCard
-          progress={
-            <WizardProgress
-              steps={steps}
-              current={current}
-              furthest={furthest}
-              onJump={handleJump}
-            />
-          }
-          name={stepName}
-          description={stepDescription}
-          headingRef={headingRef}
-          footer={footer}
-          showFocusRing={showHeadingFocusRing}
-        >
-          {body}
-        </WizardCard>
+      {previewMode ? (
+        <WizardLayoutPicker layout={layout} onChange={changeLayout} />
+      ) : null}
+      <div ref={wrapperRef} className="wizard-layout-root relative">
+        {displayedWizard}
       </div>
       {/* The persistent "Prefer to set it up yourself?" link that used to sit
        *  here is gone. It existed for the no-JavaScript reader, stuck on

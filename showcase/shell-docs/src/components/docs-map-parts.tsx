@@ -231,7 +231,7 @@ export function PickGrid({
   size?: PickGridSize;
 }): React.JSX.Element {
   return (
-    <div className={pickGridClass(size)}>
+    <div className={`wizard-pick-grid ${pickGridClass(size)}`}>
       {picks.map((pick) => {
         const selected = pick.id === selectedId;
         return (
@@ -289,7 +289,9 @@ export function CapabilityGrid({
   return (
     <div
       className={
-        compact ? "grid grid-cols-1 gap-2 sm:grid-cols-2" : MAP_TILE_GRID_CLASS
+        compact
+          ? "wizard-capability-grid grid grid-cols-1 gap-2 sm:grid-cols-2"
+          : `wizard-capability-grid ${MAP_TILE_GRID_CLASS}`
       }
     >
       {capabilities.map((capability) => {
